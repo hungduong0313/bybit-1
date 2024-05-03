@@ -5,16 +5,21 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { message, Button } from 'antd';
 
+type User = {
+  email: string;
+  // Khai báo các thuộc tính khác của User nếu cần thiết
+};
+
 const Dashboard = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      if (!authUser) {
         router.push('/login');
       } else {
-        setUser(user);
+        setUser({ email: authUser.email } as User);
       }
     });
 
@@ -23,8 +28,8 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Đăng xuất người dùng khi nút logout được nhấn
-      router.push('/login'); // Chuyển hướng về trang login sau khi đăng xuất
+      await signOut(auth);
+      router.push('/login');
     } catch (error) {
       message.error('Đã xảy ra lỗi khi đăng xuất');
     }
@@ -38,7 +43,7 @@ const Dashboard = () => {
     <div>
       <h1>Dashboard</h1>
       <p>Welcome, {user.email}</p>
-      <Button onClick={handleLogout}>Logout</Button> {/* Tạo nút logout và gắn với hàm handleLogout */}
+      <Button onClick={handleLogout}>Logout</Button>
     </div>
   );
 };
