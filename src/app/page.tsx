@@ -14,7 +14,7 @@ const HomePage = () => {
   return (
     <div style={{ padding: '20px' }}>
       <h1>Welcome to my project</h1>
-      <Button type="primary" onClick={goToLogin}> // Đăng nhập tại đây
+      <Button type="primary" onClick={goToLogin}> {'Đăng nhập tại đây'}
       </Button>
 
     </div>
