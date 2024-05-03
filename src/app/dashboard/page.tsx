@@ -1,30 +1,44 @@
 'use client';
-
-import { Button } from 'antd';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
-import { auth } from '/firebaseConfig';
-import { message } from 'antd';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import { message, Button } from 'antd';
 
 const Dashboard = () => {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push('/login');
+      } else {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Đăng xuất khỏi Firebase Auth
-      message.success('Đăng xuất thành công!');
-      router.push('/'); // Chuyển hướng về trang đăng nhập
+      await signOut(auth); // Đăng xuất người dùng khi nút logout được nhấn
+      router.push('/login'); // Chuyển hướng về trang login sau khi đăng xuất
     } catch (error) {
-      message.error('Lỗi khi đăng xuất. Vui lòng thử lại.');
+      message.error('Đã xảy ra lỗi khi đăng xuất');
     }
   };
 
+  if (!user) {
+    return <p>Loading...</p>;
+  }
+
   return (
-    <div style={{ padding: '20px' }}>
+    <div>
       <h1>Dashboard</h1>
-      <Button type="primary" onClick={handleLogout}>
-        Đăng xuất
-      </Button>
+      <p>Welcome, {user.email}</p>
+      <Button onClick={handleLogout}>Logout</Button> {/* Tạo nút logout và gắn với hàm handleLogout */}
     </div>
   );
 };
